@@ -118,6 +118,9 @@ public class MakeUpdatesMojo extends AbstractGetdownMojo {
 	private boolean outputJarVersions;
 
 	@Parameter()
+	private ResourceSet[] additionalClasspathResources;
+
+	@Parameter()
 	private ResourceSet[] resources;
 
 	@Parameter()
@@ -226,6 +229,7 @@ public class MakeUpdatesMojo extends AbstractGetdownMojo {
 	private Artifact artifactWithMainClass;
 	private List<Artifact> packagedJnlpArtifacts = new ArrayList<Artifact>();
 	private final List<String> modifiedJnlpArtifacts = new ArrayList<String>();
+	private List<String> additionalClasspathResourcePaths;
 	private List<String> uresourceSetPaths;
 	private List<NResourcePath> nresourceSetPaths;
 	private List<String> resourceSetPaths;
@@ -265,6 +269,9 @@ public class MakeUpdatesMojo extends AbstractGetdownMojo {
 	}
 
 	protected void copyResourceSets() throws MojoExecutionException {
+		if (additionalClasspathResources != null) {
+			additionalClasspathResourcePaths = copyResourceSets(additionalClasspathResources);
+		}
 		if (resources != null) {
 			resourceSetPaths = copyResourceSets(resources);
 		}
@@ -352,13 +359,17 @@ public class MakeUpdatesMojo extends AbstractGetdownMojo {
 				writer.println(String.format("code = %s", name));
 			}
 
+			if (additionalClasspathResourcePaths != null) {
+				for (String path : additionalClasspathResourcePaths) {
+					writer.println(String.format("code = %s", path));
+				}
+			}
+
 			writer.println();
 			writer.println("# Resources");
 			if (resourceSetPaths != null) {
-				if (resourceSetPaths != null) {
-					for (String p : resourceSetPaths) {
-						writer.println(String.format("resource = %s", p));
-					}
+				for (String p : resourceSetPaths) {
+					writer.println(String.format("resource = %s", p));
 				}
 			}
 			writeUIResources(writer);
